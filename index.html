@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body onload="initGame()">
+
+    <h1>Mine sweeper game</h1>
+
+    <div class="main-box">
+        <div>
+            <button>Easy</button>
+            <button>Normal</button>
+            <button>Hard</button> <br>
+            <button class="face" onclick="restart()"></button>
+        </div>
+
+        <table>
+            <tbody class="board"></tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        <h2>Alexander Yaroslavski</h2>
+    </div>
+        
+        <script src="js/util.js"></script>
+        <script src="js/main.js"></script>
+        <script>document.addEventListener("contextmenu", function(disable){
+            disable.preventDefault();
+        })</script>
+
+</body>
+
+</html>
