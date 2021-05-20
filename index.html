@@ -13,26 +13,33 @@
 
     <h1>Mine sweeper game</h1>
 
+    <div class="timer">
+        <h2>Timer</h2>
+    </div>
+
     <div class="main-box">
         <div>
-            <button>Easy</button>
-            <button>Normal</button>
-            <button>Hard</button> <br>
+            <button onclick="easy()">Easy</button>
+            <button onclick="normal()">Normal</button>
+            <button onclick="hard()">Hard</button> <br>
             <button class="face" onclick="restart()"></button>
         </div>
 
         <table>
             <tbody class="board"></tbody>
         </table>
+        <div class="lives">
+            <h1>Lives left: <span></span></h1>
+        </div>
     </div>
 
-    <div class="footer">
+    <footer>
         <h2>Alexander Yaroslavski</h2>
-    </div>
-        
-        <script src="js/util.js"></script>
-        <script src="js/main.js"></script>
-        <script>document.addEventListener("contextmenu", function(disable){
+    </footer>
+
+    <script src="js/util.js"></script>
+    <script src="js/main.js"></script>
+    <script>document.addEventListener("contextmenu", function (disable) {
             disable.preventDefault();
         })</script>
 

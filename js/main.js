@@ -5,23 +5,49 @@ const START = '😀';
 const DEAD = '🤯';
 const WIN = '😎';
 const FLAG = '🚩'
+const HINT = '💡'
+
 
 var gIsGameOn = false;
 var gIsGameOver = false;
+var gSize = 4;
+var gMines = 2;
+// var gIsHintOn = false;
+var gTimerintervalId;
+var gLives;
+var gElLives = document.querySelector('.lives h1 span');
 
 var gBoard;
 
 function initGame() {
     document.querySelector('.face').innerText = START;
-    gBoard = creatMat(6)
+    gElLives.innerText = '❤❤❤';
+    gLives = 3;
+    gBoard = creatMat(gSize)
     renderBoard(gBoard);
+}
+
+function creatMat(size) {
+    var board = [];
+    for (var i = 0; i < size; i++) {
+        board.push([])
+        for (var j = 0; j < size; j++) {
+            board[i][j] = {
+                isMine: false,
+                value: 0,
+                isFlagged: false,
+                isRevealed: false
+            };
+        }
+    }
+    return board;
 }
 
 
 // insert mines at random. 
 // updating only the model.
-function insertMines(locations, times) {
-    for (var i = 0; i < times; i++) {
+function insertMines(locations, gMines) {
+    for (var i = 0; i < gMines; i++) {
         var rndmIdx = getRandomInt(0, locations.length);
         var rndmLocation = locations.splice(rndmIdx, 1);
         gBoard[rndmLocation[0].i][rndmLocation[0].j].isMine = true;
@@ -43,12 +69,12 @@ function checkIfmineAndAddValue(board) {
 }
 
 // neiborsloop;
-function addValue(cordI, cordJ, board) {
-    for (var i = cordI - 1; i <= cordI + 1; i++) {
+function addValue(coordI, coordJ, board) {
+    for (var i = coordI - 1; i <= coordI + 1; i++) {
         if (i < 0 || i >= board.length) continue;
-        for (var j = cordJ - 1; j <= cordJ + 1; j++) {
+        for (var j = coordJ - 1; j <= coordJ + 1; j++) {
             if (j < 0 || j >= board[i].length) continue;
-            if (i === cordI && j === cordJ) continue;
+            if (i === coordI && j === coordJ) continue;
             if (!board[i][j].isMine) board[i][j].value++;
         }
     }
@@ -77,9 +103,10 @@ function renderBoard(board) {
 
 function startGame(i, j) {
     gIsGameOn = true;
+    startTimer()
 
     var locations = getLocations(gBoard, i, j)
-    insertMines(locations, 8);
+    insertMines(locations, gMines);
     checkIfmineAndAddValue(gBoard);
 
 }
@@ -87,7 +114,7 @@ function startGame(i, j) {
 // gets the chosen cell element, using its data to get its coords
 // main game function for rendering each cell.
 
-function clicked(elCell) {
+function clicked(elCell) {    
     if (gIsGameOver) return;
     if (isVictory()) return;
 
@@ -101,9 +128,12 @@ function clicked(elCell) {
 
     // model update.
     var cell = gBoard[coord.i][coord.j];
+
+
     if (cell.isFlagged) return;
     cell.isRevealed = true;
-
+   
+    
     // dom update. (render cell)
     if (cell.isMine) {
         elCell.innerText = MINE;
@@ -116,21 +146,32 @@ function clicked(elCell) {
         if (cell.value === 3) elCell.style.color = 'red'
         if (cell.value === 4) elCell.style.color = 'brown'
         if (cell.value > 4) elCell.style.color = 'black'
-            elCell.style.backgroundColor = 'lightYellow';
+        elCell.style.backgroundColor = 'lightYellow';
     } else {
         elCell.innerText = '';
         elCell.style.backgroundColor = 'lightYellow';
     }
     isVictory();
 }
-
+    //checking if there are any lives left.
+    //if not game over!
 function gameOver() {
-    gIsGameOver = true;
-    console.log('game over')
+
+    gLives--
+
+    if(gLives === 2)  gElLives.innerText = '❤❤';
+    if(gLives === 1)  gElLives.innerText = '❤';
+    if(gLives === 0)  gElLives.innerText = '';  
+        
+    if(gLives)return;
+
+    clearInterval(gTimerintervalId)
+    gIsGameOver = true;    
     document.querySelector('.face').innerText = DEAD
 }
 
 function restart() {
+    clearInterval(gTimerintervalId)
     gIsGameOver = false;
     gIsGameOn = false;
     initGame()
@@ -138,21 +179,20 @@ function restart() {
 
 function isVictory() {
     var counter = 0;
-    var size = 6;
-    var mines = 8;
+    var size = gSize;
+    var mines = gMines;
     for (var i = 0; i < gBoard.length; i++) {
         for (var j = 0; j < gBoard[0].length; j++) {
-            if (gBoard[i][j].isRevealed) counter++
+            if (gBoard[i][j].isRevealed && !gBoard[i][j].isMine) counter++
         }
     }
     if (counter === (size ** 2 - mines)) {
         document.querySelector('.face').innerText = WIN
 
+        clearInterval(gTimerintervalId);
         return true
     }
 }
-
-
 
 function flag(elCell) {
     var dataCoords = elCell.dataset.coords;
@@ -168,3 +208,40 @@ function flag(elCell) {
         elCell.innerText = FLAG;
     }
 }
+
+function easy() {
+    gSize = 4;
+    gMines = 2;
+    gIsGameOn = false;
+    initGame();
+}
+function normal() {
+    gSize = 8;
+    gMines = 12;
+    gIsGameOn = false;
+    initGame();
+}
+function hard() {
+    gSize = 12;
+    gMines = 30;
+    gIsGameOn = false;
+    initGame();
+}
+
+function startTimer(){
+    var secs = 0;
+    var mins = 0;
+    var elTimer = document.querySelector('.timer h2')
+
+    gTimerintervalId = setInterval(function(){
+        secs++
+        if (secs === 60){
+            secs = 0
+            mins++
+        } 
+        if (secs < 10) elTimer.innerText = `0${mins} : 0${secs}`;
+        if (secs >= 10) elTimer.innerText = `0${mins} : ${secs}`;
+
+    }, 1000)
+}
+

@@ -1,20 +1,5 @@
 'use strict'
 
-function creatMat(size) {
-    var board = [];
-    for (var i = 0; i < size; i++) {
-        board.push([])
-        for (var j = 0; j < size; j++) {
-            board[i][j] = {
-                isMine: false,
-                value: 0,
-                isFlagged: false,
-                isRevealed: false
-            };
-        }
-    }
-    return board;
-}
 
 
 function getRandomInt(min, max) {
