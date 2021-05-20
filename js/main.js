@@ -15,7 +15,7 @@ var gLevel = {
 var gIsGameOn = false;
 var gIsGameOver = false;
 var gChange;
-var gChanges = []
+var gChanges = [];
 
 
 // var gIsHintOn = false;
@@ -24,8 +24,6 @@ var gLives;
 var gElLives = document.querySelector('.lives h1 span');
 var gScore = 0;
 var gBestScore = Infinity;
-
-var gBoards = [];
 var gBoard;
 
 function initGame() {
@@ -33,8 +31,9 @@ function initGame() {
     document.querySelector('.face').innerText = START;
     gElLives.innerText = '❤❤❤';
     gLives = 3;
-    gBoard = creatMat(gLevel.size)
+    gBoard = creatMat(gLevel.size);
     gScore = 0;
+    gChanges = [];
     renderBoard(gBoard);
 }
 
@@ -53,7 +52,6 @@ function creatMat(size) {
     }
     return board;
 }
-
 
 // insert mines at random. 
 // updating only the model.
@@ -95,10 +93,10 @@ function addValue(coordI, coordJ, board) {
 // used at gameStart function only.
 
 function renderBoard(board) {
-    var elBoard = document.querySelector('.board')
-    var strHtml = ''
+    var elBoard = document.querySelector('.board');
+    var strHtml = '';
     for (var i = 0; i < board.length; i++) {
-        strHtml += '<tr>'
+        strHtml += '<tr>';
         for (var j = 0; j < board[i].length; j++) {
             if (board[i][j].isFlagged) {
                 strHtml += `<td  oncontextmenu="flag(this)" onclick="clicked(this)" data-coords="${i}-${j}" >${FLAG}</td>`;
@@ -113,7 +111,7 @@ function renderBoard(board) {
             }
 
         }
-        strHtml += '</tr>'
+        strHtml += '</tr>';
     }
     elBoard.innerHTML = strHtml;
 }
@@ -124,16 +122,15 @@ function renderBoard(board) {
 function startGame(i, j) {
     gIsGameOn = true;
     clearInterval(gTimerintervalId);
-    startTimer()
+    startTimer();
 
-    var locations = getLocations(gBoard, i, j)
+    var locations = getLocations(gBoard, i, j);
     insertMines(locations, gLevel.mines);
     checkIfmineAndAddValue(gBoard);
 
 }
-
 // gets the chosen cell element, using its data to get its coords
-// main game function for rendering each cell.
+// choosing action acording to the model data.
 
 function clicked(elCell) {
     if (gIsGameOver) return;
@@ -144,12 +141,9 @@ function clicked(elCell) {
 
     if (!gIsGameOn) startGame(coord.i, coord.j); // on first click.
 
-
     // after the first click.
-
     // model update.
     var cell = gBoard[coord.i][coord.j];
-
 
     if (cell.isFlagged) return;
     cell.isRevealed = true;
@@ -161,8 +155,7 @@ function clicked(elCell) {
     console.log(gChanges);
     // dom update. (render cell)
     if (cell.isMine) {
-        // elCell.innerText = MINE;
-        // elCell.style.backgroundColor = 'red';
+        
         gameOver();
 
     } else if (!cell.value) {
@@ -177,7 +170,7 @@ function clicked(elCell) {
             }
         }
     }
-    renderBoard(gBoard)
+    renderBoard(gBoard);
 
     isVictory();
 
@@ -186,7 +179,7 @@ function clicked(elCell) {
 //if not game over!
 function gameOver() {
 
-    gLives--
+    gLives--;
 
     if (gLives === 2) gElLives.innerText = '❤❤';
     if (gLives === 1) gElLives.innerText = '❤';
@@ -194,18 +187,18 @@ function gameOver() {
 
     if (gLives) return;
 
-    clearInterval(gTimerintervalId)
+    clearInterval(gTimerintervalId);
     gIsGameOver = true;
-    document.querySelector('.face').innerText = DEAD
+    document.querySelector('.face').innerText = DEAD;
 
 }
 
 function restart() {
-    clearInterval(gTimerintervalId)
+    clearInterval(gTimerintervalId);
     gIsGameOver = false;
     gIsGameOn = false;
 
-    initGame()
+    initGame();
 }
 
 function isVictory() {
@@ -247,13 +240,17 @@ function easy() {
     gLevel.mines = 2;
     gIsGameOn = false;
     initGame();
+
+
 }
+
 function normal() {
     gLevel.size = 8;
     gLevel.mines = 12;
     gIsGameOn = false;
     initGame();
 }
+
 function hard() {
     gLevel.size = 12;
     gLevel.mines = 30;
