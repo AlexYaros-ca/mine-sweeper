@@ -7,13 +7,15 @@ const WIN = '😎';
 const FLAG = '🚩'
 const HINT = '💡'
 
-var gLevel= {
+var gLevel = {
     size: 4,
     mines: 2,
     bestScore: Infinity
 }
 var gIsGameOn = false;
 var gIsGameOver = false;
+var gChange;
+var gChanges = []
 
 
 // var gIsHintOn = false;
@@ -151,27 +153,34 @@ function clicked(elCell) {
 
     if (cell.isFlagged) return;
     cell.isRevealed = true;
-
+    gChange = {
+        i: coord.i,
+        j: coord.j,
+    }
+    gChanges.unshift(gChange)
+    console.log(gChanges);
     // dom update. (render cell)
     if (cell.isMine) {
         // elCell.innerText = MINE;
         // elCell.style.backgroundColor = 'red';
         gameOver();
-        
+
     } else if (!cell.value) {
+
         for (var i = coord.i - 1; i <= coord.i + 1; i++) {
             if (i < 0 || i >= gBoard.length) continue;
             for (var j = coord.j - 1; j <= coord.j + 1; j++) {
                 if (j < 0 || j >= gBoard[i].length) continue;
-                if(gBoard[i][j].isFlagged) continue;
+                if (gBoard[i][j].isFlagged) continue;
                 gBoard[i][j].isRevealed = true;
+
             }
         }
     }
     renderBoard(gBoard)
 
     isVictory();
-    
+
 }
 //checking if there are any lives left.
 //if not game over!
@@ -188,14 +197,14 @@ function gameOver() {
     clearInterval(gTimerintervalId)
     gIsGameOver = true;
     document.querySelector('.face').innerText = DEAD
-    
+
 }
 
 function restart() {
     clearInterval(gTimerintervalId)
     gIsGameOver = false;
     gIsGameOn = false;
-   
+
     initGame()
 }
 
@@ -212,8 +221,8 @@ function isVictory() {
         document.querySelector('.face').innerText = WIN
 
         clearInterval(gTimerintervalId);
-        if(gBestScore > gScore) gBestScore = gScore;
-        console.log(gBestScore);
+        if (gBestScore > gScore) gBestScore = gScore;
+        document.querySelector('.timer span').innerText = gBestScore;
         return true
     }
 }
@@ -269,3 +278,21 @@ function startTimer() {
     }, 1000)
 }
 
+function undo() {
+    var currCell = gBoard[gChanges[0].i][gChanges[0].j]
+    if (currCell.value || currCell.isMine) {
+        currCell.isRevealed = false;
+    } else {
+        for (var i = gChanges[0].i - 1; i <= gChanges[0].i +1; i++) {
+            if (i < 0 || i >= gBoard.length) continue;
+            for (var j = gChanges[0].j - 1; j <= gChanges[0].j + 1; j++) {
+                if (j < 0 || j >= gBoard[i].length) continue;
+                if (gBoard[i][j].isFlagged) continue;
+                gBoard[i][j].isRevealed = false ;
+
+            }
+        }
+    }
+    gChanges.shift()
+    renderBoard(gBoard)
+}

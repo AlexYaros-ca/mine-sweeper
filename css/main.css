@@ -6,7 +6,7 @@ body{
 }
 
 .timer{
-    height: 80px;
+    height: 150px;
     width: 150px;
     background-color: royalblue;
     color: red;
@@ -21,7 +21,7 @@ body{
 
 .main-box{
     margin: auto;
-    height: 950px;
+    height: 1050px;
     width: 680px;
     background-color: royalblue;
     padding: 5px;
