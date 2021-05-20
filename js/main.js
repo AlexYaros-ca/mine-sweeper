@@ -7,16 +7,23 @@ const WIN = '😎';
 const FLAG = '🚩'
 const HINT = '💡'
 
-
+var gLevel= {
+    size: 4,
+    mines: 2,
+    bestScore: Infinity
+}
 var gIsGameOn = false;
 var gIsGameOver = false;
-var gSize = 4;
-var gMines = 2;
+
+
 // var gIsHintOn = false;
 var gTimerintervalId;
 var gLives;
 var gElLives = document.querySelector('.lives h1 span');
+var gScore = 0;
+var gBestScore = Infinity;
 
+var gBoards = [];
 var gBoard;
 
 function initGame() {
@@ -24,7 +31,8 @@ function initGame() {
     document.querySelector('.face').innerText = START;
     gElLives.innerText = '❤❤❤';
     gLives = 3;
-    gBoard = creatMat(gSize)
+    gBoard = creatMat(gLevel.size)
+    gScore = 0;
     renderBoard(gBoard);
 }
 
@@ -90,9 +98,18 @@ function renderBoard(board) {
     for (var i = 0; i < board.length; i++) {
         strHtml += '<tr>'
         for (var j = 0; j < board[i].length; j++) {
-            if (!board[i][j].isRevealed) {
+            if (board[i][j].isFlagged) {
+                strHtml += `<td  oncontextmenu="flag(this)" onclick="clicked(this)" data-coords="${i}-${j}" >${FLAG}</td>`;
+            } else if (!board[i][j].isRevealed) {
                 strHtml += `<td  oncontextmenu="flag(this)" onclick="clicked(this)" data-coords="${i}-${j}" ></td>`;
+            } else if (board[i][j].isMine) {
+                strHtml += `<td  class="mine" data-coords="${i}-${j}" >${MINE}</td>`;
+            } else if (!board[i][j].value) {
+                strHtml += `<td  class="revealed" data-coords="${i}-${j}" ></td>`;
+            } else {
+                strHtml += `<td  class="revealed" data-coords="${i}-${j}" >${board[i][j].value}</td>`;
             }
+
         }
         strHtml += '</tr>'
     }
@@ -108,7 +125,7 @@ function startGame(i, j) {
     startTimer()
 
     var locations = getLocations(gBoard, i, j)
-    insertMines(locations, gMines);
+    insertMines(locations, gLevel.mines);
     checkIfmineAndAddValue(gBoard);
 
 }
@@ -116,7 +133,7 @@ function startGame(i, j) {
 // gets the chosen cell element, using its data to get its coords
 // main game function for rendering each cell.
 
-function clicked(elCell) {    
+function clicked(elCell) {
     if (gIsGameOver) return;
     if (isVictory()) return;
 
@@ -134,55 +151,58 @@ function clicked(elCell) {
 
     if (cell.isFlagged) return;
     cell.isRevealed = true;
-   
-    
+
     // dom update. (render cell)
     if (cell.isMine) {
-        elCell.innerText = MINE;
-        elCell.style.backgroundColor = 'red';
+        // elCell.innerText = MINE;
+        // elCell.style.backgroundColor = 'red';
         gameOver();
-    } else if (cell.value > 0) {
-        elCell.innerText = cell.value;
-        if (cell.value === 1) elCell.style.color = 'green'
-        if (cell.value === 2) elCell.style.color = 'blue'
-        if (cell.value === 3) elCell.style.color = 'red'
-        if (cell.value === 4) elCell.style.color = 'brown'
-        if (cell.value > 4) elCell.style.color = 'black'
-        elCell.style.backgroundColor = 'lightYellow';
-    } else {
-        elCell.innerText = '';
-        elCell.style.backgroundColor = 'lightYellow';
+        
+    } else if (!cell.value) {
+        for (var i = coord.i - 1; i <= coord.i + 1; i++) {
+            if (i < 0 || i >= gBoard.length) continue;
+            for (var j = coord.j - 1; j <= coord.j + 1; j++) {
+                if (j < 0 || j >= gBoard[i].length) continue;
+                if(gBoard[i][j].isFlagged) continue;
+                gBoard[i][j].isRevealed = true;
+            }
+        }
     }
+    renderBoard(gBoard)
+
     isVictory();
+    
 }
-    //checking if there are any lives left.
-    //if not game over!
+//checking if there are any lives left.
+//if not game over!
 function gameOver() {
 
     gLives--
 
-    if(gLives === 2)  gElLives.innerText = '❤❤';
-    if(gLives === 1)  gElLives.innerText = '❤';
-    if(gLives === 0)  gElLives.innerText = '';  
-        
-    if(gLives)return;
+    if (gLives === 2) gElLives.innerText = '❤❤';
+    if (gLives === 1) gElLives.innerText = '❤';
+    if (gLives === 0) gElLives.innerText = '';
+
+    if (gLives) return;
 
     clearInterval(gTimerintervalId)
-    gIsGameOver = true;    
+    gIsGameOver = true;
     document.querySelector('.face').innerText = DEAD
+    
 }
 
 function restart() {
     clearInterval(gTimerintervalId)
     gIsGameOver = false;
     gIsGameOn = false;
+   
     initGame()
 }
 
 function isVictory() {
     var counter = 0;
-    var size = gSize;
-    var mines = gMines;
+    var size = gLevel.size;
+    var mines = gLevel.mines;
     for (var i = 0; i < gBoard.length; i++) {
         for (var j = 0; j < gBoard[0].length; j++) {
             if (gBoard[i][j].isRevealed && !gBoard[i][j].isMine) counter++
@@ -192,6 +212,8 @@ function isVictory() {
         document.querySelector('.face').innerText = WIN
 
         clearInterval(gTimerintervalId);
+        if(gBestScore > gScore) gBestScore = gScore;
+        console.log(gBestScore);
         return true
     }
 }
@@ -212,38 +234,38 @@ function flag(elCell) {
 }
 
 function easy() {
-    gSize = 4;
-    gMines = 2;
+    gLevel.size = 4;
+    gLevel.mines = 2;
     gIsGameOn = false;
     initGame();
 }
 function normal() {
-    gSize = 8;
-    gMines = 12;
+    gLevel.size = 8;
+    gLevel.mines = 12;
     gIsGameOn = false;
     initGame();
 }
 function hard() {
-    gSize = 12;
-    gMines = 30;
+    gLevel.size = 12;
+    gLevel.mines = 30;
     gIsGameOn = false;
     initGame();
 }
 
-function startTimer(){
+function startTimer() {
     var secs = 0;
     var mins = 0;
     var elTimer = document.querySelector('.timer h2')
 
-    gTimerintervalId = setInterval(function(){
+    gTimerintervalId = setInterval(function () {
         secs++
-        if (secs === 60){
+        if (secs === 60) {
             secs = 0
             mins++
-        } 
+        }
         if (secs < 10) elTimer.innerText = `0${mins} : 0${secs}`;
         if (secs >= 10) elTimer.innerText = `0${mins} : ${secs}`;
-
+        gScore++
     }, 1000)
 }
 

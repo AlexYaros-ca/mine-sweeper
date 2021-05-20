@@ -91,3 +91,10 @@ footer{
   
     border-bottom: 5px solid rgb(185, 187, 69);
 }
+
+.revealed{
+    background-color: lightyellow;
+}
+.mine{
+    background-color: red;
+}
