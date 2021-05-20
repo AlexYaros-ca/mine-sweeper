@@ -20,6 +20,7 @@ var gElLives = document.querySelector('.lives h1 span');
 var gBoard;
 
 function initGame() {
+    clearInterval(gTimerintervalId);
     document.querySelector('.face').innerText = START;
     gElLives.innerText = '❤❤❤';
     gLives = 3;
@@ -103,6 +104,7 @@ function renderBoard(board) {
 
 function startGame(i, j) {
     gIsGameOn = true;
+    clearInterval(gTimerintervalId);
     startTimer()
 
     var locations = getLocations(gBoard, i, j)
